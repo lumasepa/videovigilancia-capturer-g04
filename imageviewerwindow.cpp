@@ -71,7 +71,7 @@ void ImageViewerWindow::on_action_Abrir_triggered()
     {
         // Para el video
         video.stop();
-        //video.setSpeed(25);
+        video.setSpeed(10);
 
         // Pone como nuevo video fileName
         video.setFileName(fileName);
@@ -98,8 +98,8 @@ void ImageViewerWindow::img_Procesed(const QImage &image,const QVector<QRect> &V
     QPixmap img;
     QImage imagen = image;
     QPainter pintura(&imagen);
-    QColor verde(0,255,0,255);
-    pintura.setPen(verde);
+    QColor rojo(255,0,0,255);
+    pintura.setPen(rojo);
 
     pintura.drawRects(VRect);
     //qDebug() <<"main "<<VRect[0].left()<<" "<<VRect[0].top()<< " "<<VRect[0].width()<<" "<<VRect[0].height();
@@ -131,8 +131,8 @@ void Image_Thread::process_image(const QImage &image)
     // Operaciones morfolóficas para eliminar las regiones de
     // pequeño tamaño. Erode() las encoge y dilate() las vuelve a
     // agrandar.
-    cv::erode(foregroundMask, foregroundMask, cv::Mat());
-    cv::dilate(foregroundMask, foregroundMask, cv::Mat());
+    cv::erode(foregroundMask, foregroundMask, cv::Mat(),cv::Point(-1,-1),5);
+    cv::dilate(foregroundMask, foregroundMask, cv::Mat(),cv::Point(-1,-1),5);
     // Obtener los contornos que bordean las regiones externas
     // (CV_RETR_EXTERNAL) encontradas. Cada contorno es un vector
     // de puntos y se devuelve uno por región en la máscara.
