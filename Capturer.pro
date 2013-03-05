@@ -18,3 +18,7 @@ SOURCES += main.cpp\
 HEADERS  += imageviewerwindow.h
 
 FORMS    += imageviewerwindow.ui
+
+include(QtOpenCV.pri)
+
+add_opencv_modules(core video imgproc)
