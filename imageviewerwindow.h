@@ -5,6 +5,7 @@
 #include <QMovie>
 #include <QThread>
 #include "cvmatandqimage.h"
+#include<opencv2/opencv.hpp>
 
 // Definimos algunos tipos para que el código se lea mejor
 typedef std::vector<cv::Mat> ImagesType;
@@ -26,6 +27,16 @@ class Image_Thread : public QObject
     public slots:
         // Método encargado del ordenamiento
         void process_image(const QImage &image);
+    public:
+        Image_Thread()
+        {
+            backgroundSubtractor = new cv::BackgroundSubtractorMOG2(500,16,false);
+            backgroundSubtractor->set("nmixtures",3);
+        }
+
+private:
+        cv::BackgroundSubtractorMOG2 *backgroundSubtractor;
+        cv::Mat foregroundMask;
 };
 
 class ImageViewerWindow : public QMainWindow

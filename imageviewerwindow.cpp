@@ -23,6 +23,8 @@ ImageViewerWindow::ImageViewerWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    qRegisterMetaType< QVector<QRect> >("QVector<QRect>");
+
     QObject::connect(&video,SIGNAL(updated(const QRect&)),this,SLOT(on_movie_updated(const QRect&)));
     // Pasar la petición de procesar el frame
     QObject::connect(this, SIGNAL(img_ProcesorRequest(const QImage &)),
@@ -37,6 +39,8 @@ ImageViewerWindow::ImageViewerWindow(QWidget *parent) :
 
     // Iniciar el hilo de trabajo
     workingThread_.start();
+
+
 
 }
 
@@ -94,10 +98,11 @@ void ImageViewerWindow::img_Procesed(const QImage &image,const QVector<QRect> &V
     QPixmap img;
     QImage imagen = image;
     QPainter pintura(&imagen);
+    QColor verde(0,255,0,255);
+    pintura.setPen(verde);
 
-    for(int i = 0; i < VRect.size();i++)
-        pintura.drawRect(VRect[i]);
-
+    pintura.drawRects(VRect);
+    //qDebug() <<"main "<<VRect[0].left()<<" "<<VRect[0].top()<< " "<<VRect[0].width()<<" "<<VRect[0].height();
     //img = pintura.
     img.convertFromImage(imagen);
     ui->Imagen->setPixmap(img);
@@ -110,9 +115,9 @@ void Image_Thread::process_image(const QImage &image)
 
     cv::Mat img = QtOcv::image2Mat(image);
     // Instancia de la clase del sustractor de fondo
-     cv::BackgroundSubtractorMOG2 backgroundSubtractor(500,16,false);
+    // cv::BackgroundSubtractorMOG2 backgroundSubtractor(500,16,false);
     //cv::BackgroundSubtractorMOG2 backgroundSubtractor;
-     backgroundSubtractor.set("nmixtures",3);
+    // backgroundSubtractor.set("nmixtures",3);
     // Desactivar la detección de sombras
     //backgroundSubtractor.bShadowDetection = false;
     // Sustracción del fondo:
@@ -122,8 +127,7 @@ void Image_Thread::process_image(const QImage &image)
     //     primer plano.
     //  2. El objeto sustractor actualiza su estimación del fondo
     //     usando la imagen en i.
-    cv::Mat foregroundMask;
-    backgroundSubtractor(img, foregroundMask);
+    (*backgroundSubtractor)(img, foregroundMask);
     // Operaciones morfolóficas para eliminar las regiones de
     // pequeño tamaño. Erode() las encoge y dilate() las vuelve a
     // agrandar.
@@ -135,12 +139,14 @@ void Image_Thread::process_image(const QImage &image)
     ContoursType contours;
     cv::findContours(foregroundMask, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
 
+    //Pasa el vector de contornos(rect) a vector de Qrect
    QVector<QRect> VRect;
-
+   VRect.clear();
    for(unsigned i = 0;i< contours.size();i++)
    {
         cv::Rect recta = cv::boundingRect(contours[i]);
         QRect qrecta(recta.x,recta.y,recta.width,recta.height);
+        qDebug() <<"hilo"<<recta.x<< " "<<recta.y<<" "<<recta.width<<" "<<recta.height;
         VRect.push_back(qrecta);
    }
     qDebug() << "Imagen procesada";
