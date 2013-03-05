@@ -21,7 +21,7 @@ class Image_Thread : public QObject
 
     signals:
         // Señal emitida cuando el frame ha sido procesado
-        void send_image(const QImage &image,QVector<QRect> &VRect);
+        void send_image(const QImage &image,const QVector<QRect> &VRect);
 
     public slots:
         // Método encargado del ordenamiento
@@ -47,7 +47,7 @@ private slots:
 
     void on_movie_updated(const QRect&);
 
-    void img_Procesed(const QImage &image,QVector<QRect> &VRect);
+    void img_Procesed(const QImage &image,const QVector<QRect> &VRect);
 private:
     QThread workingThread_;
     Image_Thread imageProcesor_;

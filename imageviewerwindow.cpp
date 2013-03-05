@@ -9,6 +9,8 @@
 #include <QDebug>
 #include <QImage>
 
+#include <QPainter>
+
 #include<opencv2/opencv.hpp>
 
 #include <QWaitCondition>
@@ -27,14 +29,15 @@ ImageViewerWindow::ImageViewerWindow(QWidget *parent) :
         &imageProcesor_, SLOT(process_image(const QImage &)));
 
     // Ser notificado cuando el frame ha sido procesado
-    QObject::connect(&imageProcesor_, SIGNAL(send_image(const QImage &,QVector<QRect> &)),
-       this, SLOT(img_Procesed(const QImage &,QVector<QRect> &)));
+    QObject::connect(&imageProcesor_, SIGNAL(send_image(const QImage &,const QVector<QRect> &)),
+       this, SLOT(img_Procesed(const QImage &,const QVector<QRect> &)));
 
     // Migrar la instancia de imageProcesor al hilo de trabajo
     imageProcesor_.moveToThread(&workingThread_);
 
     // Iniciar el hilo de trabajo
     workingThread_.start();
+
 }
 
 ImageViewerWindow::~ImageViewerWindow()
@@ -64,6 +67,7 @@ void ImageViewerWindow::on_action_Abrir_triggered()
     {
         // Para el video
         video.stop();
+        //video.setSpeed(25);
 
         // Pone como nuevo video fileName
         video.setFileName(fileName);
@@ -83,12 +87,19 @@ void ImageViewerWindow::on_movie_updated(const QRect&)
     emit img_ProcesorRequest(img);
 }
 
-void ImageViewerWindow::img_Procesed(const QImage &image, QVector<QRect> &VRect)
+void ImageViewerWindow::img_Procesed(const QImage &image,const QVector<QRect> &VRect)
 {
     //recive la imagen del hilo ya procesada y la muestra
     qDebug() << "Mostrando imagen";
     QPixmap img;
-    img.convertFromImage(image);
+    QImage imagen = image;
+    QPainter pintura(&imagen);
+
+    for(int i = 0; i < VRect.size();i++)
+        pintura.drawRect(VRect[i]);
+
+    //img = pintura.
+    img.convertFromImage(imagen);
     ui->Imagen->setPixmap(img);
 }
 
@@ -125,8 +136,13 @@ void Image_Thread::process_image(const QImage &image)
     cv::findContours(foregroundMask, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
 
    QVector<QRect> VRect;
-   cv::boundingRect(contours);
 
+   for(unsigned i = 0;i< contours.size();i++)
+   {
+        cv::Rect recta = cv::boundingRect(contours[i]);
+        QRect qrecta(recta.x,recta.y,recta.width,recta.height);
+        VRect.push_back(qrecta);
+   }
     qDebug() << "Imagen procesada";
     //manda la imagen ya procesada al hilo principal
     emit send_image(image,VRect);
