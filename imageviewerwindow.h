@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QMovie>
 #include <QThread>
+
 #include "cvmatandqimage.h"
 #include<opencv2/opencv.hpp>
 
@@ -22,21 +23,18 @@ class Image_Thread : public QObject
 
     signals:
         // Señal emitida cuando el frame ha sido procesado
-        void send_image(const QImage &image,const QVector<QRect> &VRect);
+        void Mandar_imagen(const QImage &image,const QVector<QRect> &VRect);
 
     public slots:
-        // Método encargado del ordenamiento
-        void process_image(const QImage &image);
+        // Slot para procesar la imagen
+        void Procesador_imagen(const QImage &image);
     public:
-        Image_Thread()
-        {
-            backgroundSubtractor = new cv::BackgroundSubtractorMOG2(500,16,false);
-            backgroundSubtractor->set("nmixtures",3);
-        }
+        Image_Thread();
 
 private:
         cv::BackgroundSubtractorMOG2 *backgroundSubtractor;
         cv::Mat foregroundMask;
+        QVector<QRect> VRect;
 };
 
 class ImageViewerWindow : public QMainWindow
@@ -47,7 +45,7 @@ public:
     explicit ImageViewerWindow(QWidget *parent = 0);
     ~ImageViewerWindow();
 signals:
-    void img_ProcesorRequest(const QImage &image);
+    void Procesar_Imagen(const QImage &image);
 
 private slots:
     void on_BtSalir_clicked();
@@ -57,8 +55,8 @@ private slots:
     void on_action_Abrir_triggered();
 
     void on_movie_updated(const QRect&);
-
-    void img_Procesed(const QImage &image,const QVector<QRect> &VRect);
+    // Slot que se llama cuando la imagen ya ha sido procesada
+    void Pintar_Imagen(const QImage &image,const QVector<QRect> &VRect);
 private:
     QThread workingThread_;
     Image_Thread imageProcesor_;
