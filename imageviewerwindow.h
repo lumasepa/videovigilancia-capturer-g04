@@ -5,8 +5,7 @@
 #include <QMovie>
 #include <QThread>
 
-#include "cvmatandqimage.h"
-#include<opencv2/opencv.hpp>
+#include "image_thread.h"
 
 // Definimos algunos tipos para que el código se lea mejor
 typedef std::vector<cv::Mat> ImagesType;
@@ -17,25 +16,6 @@ namespace Ui {
 class ImageViewerWindow;
 }
 
-class Image_Thread : public QObject
-{
-    Q_OBJECT
-
-    signals:
-        // Señal emitida cuando el frame ha sido procesado
-        void Mandar_imagen(const QImage &image,const QVector<QRect> &VRect);
-
-    public slots:
-        // Slot para procesar la imagen
-        void Procesador_imagen(const QImage &image);
-    public:
-        Image_Thread();
-
-private:
-        cv::BackgroundSubtractorMOG2 *backgroundSubtractor;
-        cv::Mat foregroundMask;
-        QVector<QRect> VRect;
-};
 
 class ImageViewerWindow : public QMainWindow
 {
