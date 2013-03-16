@@ -21,6 +21,14 @@ HEADERS  += imageviewerwindow.h \
 
 FORMS    += imageviewerwindow.ui
 
+LIBS	+= -lprotobuf
+
 include(QtOpenCV.pri)
 
 add_opencv_modules(core video imgproc)
+
+PROTOS += protocol.proto
+include(protobuf.pri)
+
+OTHER_FILES += \
+    protocol.proto \

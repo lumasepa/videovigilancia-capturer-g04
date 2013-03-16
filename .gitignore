@@ -1,1 +1,9 @@
 *.pro.user
+*.o
+Capturer
+moc_*
+protocol.pb.cc
+protocol.pb.h
+*.autosave
+*~
+
