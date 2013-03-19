@@ -20,10 +20,12 @@ class Image_Thread : public QObject
         void Procesador_imagen(const QImage &image);
     public:
         Image_Thread();
+        void set_cierre(const bool &x);
 
-private:
+    private:
         cv::BackgroundSubtractorMOG2 *backgroundSubtractor;
         cv::Mat foregroundMask;
         QVector<QRect> VRect;
+        bool cierre;
 };
 #endif // IMAGE_THREAD_H

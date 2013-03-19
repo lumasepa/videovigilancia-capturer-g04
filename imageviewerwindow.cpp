@@ -47,6 +47,7 @@ ImageViewerWindow::ImageViewerWindow(QWidget *parent) :
 ImageViewerWindow::~ImageViewerWindow()
 {
     // Le decimos al bucle de mensajes del hilo que se detenga
+    imageProcesor_.set_cierre(true);
     workingThread_.quit();
     // Ahora esperamos a que el hilo de trabajo termine
     workingThread_.wait();
