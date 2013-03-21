@@ -6,7 +6,7 @@
 #include <QMovie>
 
 #include <QDebug>
-
+#include <QSettings>
 #include <QPixmap>
 #include <QImage>
 #include <QPainter>
@@ -40,7 +40,21 @@ ImageViewerWindow::ImageViewerWindow(QWidget *parent) :
     // Iniciar el hilo de trabajo
     workingThread_.start();
 
+    //CONFIGURACION DEL SOCKET USANDO QSETTINGS
+    // Creamos el objeto de acceso a archivo datos
+        QSettings config("config", QSettings::IniFormat);
+        puerto = config.value("puerto", "").toInt();
+        ip = config.value("ip", "").toString();
+        qDebug() << puerto << " " << ip;
 
+        socket = new QSslSocket(this);
+
+        QObject::connect(socket, SIGNAL(encrypted()), this, SLOT(socket_ready()));
+
+        QObject::connect(socket, SIGNAL(sslErrors()), this, SLOT(socket_down()));
+
+        socket->connectToHostEncrypted(ip,puerto);
+   //FIN DE CONFIGURACIÓN DEL SOCKET.
 
 }
 

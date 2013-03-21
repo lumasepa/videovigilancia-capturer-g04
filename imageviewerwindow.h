@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QMovie>
 #include <QThread>
+#include <QtNetwork>
 
 #include "image_thread.h"
 
@@ -37,11 +38,17 @@ private slots:
     void on_movie_updated(const QRect&);
     // Slot que se llama cuando la imagen ya ha sido procesada
     void Pintar_Imagen(const QImage &image,const QVector<QRect> &VRect);
+    //slot que se llama cuando el socket esta preparado
+    void socket_ready();
+    void socket_down();
 private:
     QThread workingThread_;
     Image_Thread imageProcesor_;
     Ui::ImageViewerWindow *ui;
     QMovie video;
+    int puerto;
+    QString ip;
+    QSslSocket * socket;
 };
 
 
