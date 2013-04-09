@@ -125,8 +125,8 @@ void sslserver::connectionClosed()
 void sslserver::connectionFailure()
 {
   QSslSocket *socket = dynamic_cast<QSslSocket *>(sender());
+  qDebug() << "Fallo en la conexion" << socket->errorString();
   sockets.removeOne(socket);
   socket->disconnect();
   socket->deleteLater();
-  qDebug() << "Fallo en la coneccion";
 }
