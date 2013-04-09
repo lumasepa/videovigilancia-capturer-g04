@@ -1,6 +1,6 @@
 // sensorsreport.proto - Protocolo de comunicaciones con las raspberrypi =)
 //
-message image {
+message paquete {
     required string deviceName = 1;     // Nombre de la raspberry
     required uint64 timestamp = 2;      // Seg. desde 1/1/1970
 
