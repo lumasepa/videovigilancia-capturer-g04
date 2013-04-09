@@ -27,7 +27,7 @@ include(QtOpenCV.pri)
 
 add_opencv_modules(core video imgproc)
 
-PROTOS += protocol.proto
+PROTOS = protocol.proto
 include(protobuf.pri)
 
 OTHER_FILES += \
