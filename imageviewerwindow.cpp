@@ -182,6 +182,7 @@ void ImageViewerWindow::socket_write(std::string msg)
     {
         int64_t size = msg.size();
         socket->write((char*)&size,sizeof(size));
+        qDebug() << "Tamaño del paquete" << size;
         socket->write(msg.c_str(),size);
         qDebug() << "Mensaje enviado";
     }
