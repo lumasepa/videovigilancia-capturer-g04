@@ -33,6 +33,15 @@ ImageViewerWindow::ImageViewerWindow(QWidget *parent) :
             server.port = config.value("puerto", "").toInt();
             server.key = config.value("key", "").toString();
             server.certificate = config.value("cert", "").toString();
+            QSslSocket s;
+            QList<QSslCipher> cifrados = s.supportedCiphers ();
+
+            /*QSslCipher i;
+            foreach (i, cifrados) {
+                qDebug() << i.authenticationMethod().toStdString().c_str();
+                qDebug() << i.encryptionMethod().toStdString().c_str();
+                qDebug() << i.keyExchangeMethod().toStdString().c_str();
+            }*/
    //FIN DE CONFIGURACIÓN DEL SERVER.
 
     server.listen();

@@ -43,7 +43,7 @@ public slots:
 private:
     Server server;
     QList<QSslSocket *> sockets;
-    int32_t read_buffer_sz;
+    int64_t read_buffer_sz;
 };
 
 #endif // SSLSERVER_H

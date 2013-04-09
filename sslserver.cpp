@@ -49,6 +49,7 @@ void sslserver::acceptConnection()
   socket->setLocalCertificate(certificate);
 
   socket->setPeerVerifyMode(QSslSocket::VerifyNone);
+  socket->setProtocol(QSsl::SslV3);
 
   socket->startServerEncryption();
 }
@@ -89,27 +90,24 @@ void sslserver::receiveMessage()
   QSslSocket *socket = dynamic_cast<QSslSocket *>(QObject::sender());
 
 
-  if(read_buffer_sz == -1)
-      socket->read((char *)&read_buffer_sz, sizeof(read_buffer_sz));
+ do {
+      if(read_buffer_sz == -1 && socket->readBufferSize() > sizeof(int64_t))
+          socket->read((char *)&read_buffer_sz, sizeof(read_buffer_sz));
 
-  do{
-          if(socket->readBufferSize() > read_buffer_sz )
+          if(socket->readBufferSize() > read_buffer_sz && read_buffer_sz != -1)
           {
               std::string buffer;
               buffer.resize(read_buffer_sz);
+
 
               socket->read(const_cast<char*>(buffer.c_str()), read_buffer_sz);
               qDebug() << "Mensaje!";
 
               emit received(buffer);
+              read_buffer_sz == -1;
           }
 
-          if(socket->readBufferSize() > sizeof(u_int32_t))
-               socket->read((char *)&read_buffer_sz, sizeof(read_buffer_sz));
-          else
-              read_buffer_sz = -1;
-
- }while(read_buffer_sz < socket->readBufferSize());
+ } while(read_buffer_sz < socket->readBufferSize());
 
 }
 

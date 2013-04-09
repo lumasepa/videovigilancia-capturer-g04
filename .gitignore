@@ -6,4 +6,4 @@ protocol.pb.cc
 protocol.pb.h
 *.autosave
 *~
-
+ui_imageviewerwindow.h
