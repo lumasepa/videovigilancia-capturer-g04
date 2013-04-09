@@ -11,6 +11,7 @@
 #include <opencv2/opencv.hpp>
 #include <QIODevice>
 #include "protocol.pb.h"
+#include <ctime>
 
 
 
@@ -55,6 +56,7 @@ ImageViewerWindow::ImageViewerWindow(QWidget *parent) :
         QObject::connect(socket, SIGNAL(sslErrors(const QList<QSslError>&)),this, SLOT(socket_ssl_error(const QList<QSslError>&)));
         QObject::connect(socket, SIGNAL(error(QAbstractSocket::SocketError)),this, SLOT(socketError()));
 
+        socket->setProtocol(QSsl::SslV3);
         socket->connectToHostEncrypted(ip,puerto);
         socket->ignoreSslErrors();
    //FIN DE CONFIGURACIÓN DEL SOCKET.
@@ -120,6 +122,11 @@ void ImageViewerWindow::envio_paquete(const QImage &image,const QVector<QRect> &
 
     msg.set_devicename(devicename.toStdString().c_str());
 
+    time_t t1 = 0;
+    time_t* pt1 = &t1;
+    time(pt1);
+    msg.set_timestamp(t1);
+
     for (int i=0;i<VRect.size();i++)
     {
         paquete_rect * r = msg.add_recta();
@@ -173,7 +180,7 @@ void ImageViewerWindow::socket_write(std::string msg)
 {
     if(socket->state() == QAbstractSocket::ConnectedState)
     {
-        int32_t size = msg.size();
+        int64_t size = msg.size();
         socket->write((char*)&size,sizeof(size));
         socket->write(msg.c_str(),size);
         qDebug() << "Mensaje enviado";
