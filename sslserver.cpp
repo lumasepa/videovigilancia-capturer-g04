@@ -19,7 +19,7 @@ sslserver::sslserver(QObject *parent) :
     QObject(parent)
 {
      connect(&server, SIGNAL(newConnection()), this, SLOT(acceptConnection()));
-     read_buffer_sz = -1;
+     read_buffer_sz = 0;
 }
 
 void sslserver::listen()
@@ -89,12 +89,20 @@ void sslserver::receiveMessage()
 {
   QSslSocket *socket = dynamic_cast<QSslSocket *>(QObject::sender());
 
+qDebug() << "Datos recividos!";
 
  do {
-      if(read_buffer_sz == -1 && socket->readBufferSize() > sizeof(int64_t))
-          socket->read((char *)&read_buffer_sz, sizeof(read_buffer_sz));
+//      qDebug() << "Dentro del while";
+      qDebug() << "Tamaño del primer paquete" << read_buffer_sz;
+      qDebug() << "Tamaño del buffer" << socket->bytesAvailable ();
 
-          if(socket->readBufferSize() > read_buffer_sz && read_buffer_sz != -1)
+      if(read_buffer_sz == 0 && socket->bytesAvailable () > sizeof(int64_t))
+      {
+          socket->read((char *)&read_buffer_sz, sizeof(read_buffer_sz));
+          qDebug() << "Dentro del If, tamaño de read_buffer: " << read_buffer_sz;
+
+      }
+          if(socket->bytesAvailable () > read_buffer_sz && read_buffer_sz != -1)
           {
               std::string buffer;
               buffer.resize(read_buffer_sz);
@@ -104,10 +112,10 @@ void sslserver::receiveMessage()
               qDebug() << "Mensaje!";
 
               emit received(buffer);
-              read_buffer_sz == -1;
+              read_buffer_sz = 0;
           }
 
- } while(read_buffer_sz < socket->readBufferSize());
+ } while(read_buffer_sz < socket->bytesAvailable ());
 
 }
 
