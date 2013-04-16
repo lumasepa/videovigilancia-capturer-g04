@@ -1,3 +1,4 @@
 puerto=6969
 ip=127.0.0.1
 nombre=RaspberryOPfed1
+reconect_time=30000

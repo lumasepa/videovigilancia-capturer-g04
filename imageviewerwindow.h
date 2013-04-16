@@ -5,7 +5,7 @@
 #include <QMovie>
 #include <QThread>
 #include <QtNetwork>
-
+#include <QTimer>
 #include "image_thread.h"
 #include "protocol.pb.h"
 
@@ -49,6 +49,8 @@ private slots:
     void socket_ssl_error(const QList<QSslError> &error);
     //Slot para escribir en el socket
     void socket_write(std::string msg);
+
+    void reconnect();
 private:
     QThread workingThread_;
     Image_Thread imageProcesor_;
@@ -56,9 +58,10 @@ private:
     QMovie video;
     int puerto;
     QString ip;
+    int interval;
     QString devicename;
     QSslSocket * socket;
-    bool socket_up;
+    QTimer timer;
 };
 
 

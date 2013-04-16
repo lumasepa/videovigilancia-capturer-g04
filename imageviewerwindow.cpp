@@ -12,6 +12,7 @@
 #include <QIODevice>
 #include "protocol.pb.h"
 #include <ctime>
+#include <QTimer>
 
 
 
@@ -47,8 +48,12 @@ ImageViewerWindow::ImageViewerWindow(QWidget *parent) :
         puerto = config.value("puerto", "").toInt();
         ip = config.value("ip", "").toString();
         devicename = config.value("nombre", "").toString();
+        interval = config.value("reconect_time", "").toInt();
+
+        timer.setInterval(interval);
+
         qDebug() << puerto << " " << ip << " " << devicename;
-        socket_up = false;//El socket desconectado por defecto antes de crearlo.
+
         socket = new QSslSocket(this); //Creamos una instancia del socket ssl.
 
         QObject::connect(socket, SIGNAL(encrypted()), this, SLOT(socket_ready()));
@@ -59,6 +64,10 @@ ImageViewerWindow::ImageViewerWindow(QWidget *parent) :
         socket->setProtocol(QSsl::SslV3);
         socket->connectToHostEncrypted(ip,puerto);
         socket->ignoreSslErrors();
+
+        QObject::connect(&timer, SIGNAL(timeout()),this, SLOT(reconnect()));
+
+        timer.start();
    //FIN DE CONFIGURACIÓN DEL SOCKET.
 
 }
@@ -142,13 +151,11 @@ void ImageViewerWindow::envio_paquete(const QImage &image,const QVector<QRect> &
 void ImageViewerWindow::socket_ready()
 {
     qDebug() << "Conexion del socket realizada";
-    socket_up = true;
 }
 
 void ImageViewerWindow::socket_down()
 {
     qDebug() << "Desconexion del socket realizada";
-    socket_up = false;
 }
 
 void ImageViewerWindow::socketError()
@@ -166,14 +173,11 @@ void ImageViewerWindow::socket_ssl_error(const QList<QSslError> &error)
           errorStrings += '\n';
       }
 
-      //Muestra que ha ocurrido un error de certificado y pregunta si desea continuar o no
-      QMessageBox::StandardButton result = QMessageBox::question(this, "SSL Errors",
-        QString("Han ocurrido los siguientes errores de certificación SSL:\n\n%1\n\nContinuar?").arg(errorStrings),
-        QMessageBox::Yes|QMessageBox::No);
-      if (result == QMessageBox::Yes)
-      {
-        socket->ignoreSslErrors();
-      }
+      //Muestra que ha ocurrido un error de certificado
+
+    qDebug() << QString("Han ocurrido los siguientes errores de certificación SSL:\n\n%1\n\nContinuar?").arg(errorStrings);
+
+    socket->ignoreSslErrors();
 }
 
 void ImageViewerWindow::socket_write(std::string msg)
@@ -193,5 +197,16 @@ void ImageViewerWindow::socket_write(std::string msg)
 
 }
 
+
+void ImageViewerWindow::reconnect()
+{
+    if(socket->state() == QAbstractSocket::UnconnectedState)
+    {
+        socket->connectToHostEncrypted(ip,puerto);
+        socket->ignoreSslErrors();
+        qDebug() << "Reconectando";
+    }
+    timer.start();
+}
 
 
